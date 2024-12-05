@@ -1,11 +1,29 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
+import TaskItem from "./ItemTodo";
+import { getAtividades } from "@/hooks/useAtividades";
+import IAtividade from "@/types/IAtividade";
 
 const Todolist = () => {
+  const [atividades, setAtividades] = useState<IAtividade[]>([]);
+
+  useEffect(() => {
+    const fetchAtividades = async () => {
+      const data = await getAtividades();
+      setAtividades(data);
+    };
+
+    fetchAtividades();
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-100 px-6 py-8">
       <header className="flex justify-between items-center mb-10 mt-20">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Bom dia, Usuário!</h1>
+          <h1 className="text-2xl font-bold text-gray-800">
+            Bom dia, Usuário!
+          </h1>
           <p className="text-sm text-gray-600">O que temos para hoje?</p>
         </div>
         <button className="flex items-center gap-2 bg-transparent text-gray-600 text-sm font-medium hover:text-gray-800">
@@ -28,74 +46,14 @@ const Todolist = () => {
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {[{
-          task: "Comprar bolo de aniversário",
-          category: "pessoal",
-          deadline: "05/12/24",
-          completed: false,
-        }, {
-          task: "Levar o cachorro para passear",
-          category: "pessoal",
-          deadline: "05/12/24",
-          completed: false,
-        }, {
-          task: "Lavar roupas",
-          category: "casa",
-          deadline: "05/12/24",
-          completed: false,
-        }, {
-          task: "Organizar documentos RH",
-          category: "trabalho",
-          deadline: "05/12/24",
-          completed: false,
-        }, {
-          task: "Planejar festa de aniversário",
-          category: "pessoal",
-          deadline: "05/12/24",
-          completed: false,
-        }, {
-          task: "Estudar sobre a revolução francesa",
-          category: "estudo",
-          deadline: "10/12/24",
-          completed: false,
-        }, {
-          task: "Revisar slide apresentação",
-          category: "trabalho",
-          deadline: "05/12/24",
-          completed: false,
-        }, {
-          task: "Contatar técnico da internet",
-          category: "casa",
-          deadline: "05/12/24",
-          completed: true,
-        }].map((item, index) => (
-          <div
+        {atividades.map((task, index) => (
+          <TaskItem
             key={index}
-            className="bg-indigo-100 rounded-lg shadow-md p-6 flex flex-col gap-4 w-full"
-          >
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={item.completed}
-                className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
-                readOnly
-              />
-              <span
-                className={`text-sm font-medium text-gray-800 ${
-                  item.completed ? "line-through text-gray-500" : ""
-                }`}
-              >
-                {item.task}
-              </span>
-            </div>
-            <div className="text-xs text-gray-500">
-              <p>Data limite: {item.deadline}</p>
-              <p>Categoria: {item.category}</p>
-            </div>
-            <button className="bg-indigo-500 text-white text-sm font-semibold rounded-md px-4 py-2 hover:bg-indigo-600">
-              + adicionar pomodoro
-            </button>
-          </div>
+            task={task.name}
+            category={task.id_categoria}
+            deadline={task.fimAtividade}
+            completed={task.concluida}
+          />
         ))}
       </div>
 

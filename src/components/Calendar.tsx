@@ -27,11 +27,15 @@ const Calendar: React.FC = () => {
 
   const handleEventClick = (eventInfo: any) => {
     const { id, title, start, end, color } = eventInfo.event;
+
+    const startISOString = start ? start.toISOString() : "";
+    const endISOString = end ? end.toISOString() : "";
+
     setSelectedAtividade({
       _id: id,
       name: title,
-      inicioAtividade: start.toISOString(), // Converte para string
-      fimAtividade: end.toISOString(), // Converte para string
+      inicioAtividade: startISOString, // Converte para string
+      fimAtividade: endISOString, // Converte para string
       cor: color,
       isPommodoro: false,
       concluida: false,
