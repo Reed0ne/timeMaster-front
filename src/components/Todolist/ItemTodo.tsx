@@ -5,6 +5,9 @@ interface TaskItemProps {
   category: string;
   deadline: string;
   completed: boolean;
+  onCheckboxChange: (atividadeId: string, concluida: boolean) => void;
+  atividadeId: string;
+  categoryColor: string;
 }
 
 const TaskItem: React.FC<TaskItemProps> = ({
@@ -12,6 +15,9 @@ const TaskItem: React.FC<TaskItemProps> = ({
   category,
   deadline,
   completed,
+  onCheckboxChange,
+  atividadeId,
+  categoryColor,
 }) => {
   return (
     <div className="bg-indigo-100 rounded-lg shadow-md p-6 flex flex-col gap-4 w-full">
@@ -20,7 +26,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
           type="checkbox"
           checked={completed}
           className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
-          readOnly
+          onChange={() => onCheckboxChange(atividadeId, completed)}
         />
         <span
           className={`text-sm font-medium text-gray-800 ${
@@ -32,7 +38,17 @@ const TaskItem: React.FC<TaskItemProps> = ({
       </div>
       <div className="text-xs text-gray-500">
         <p>Data limite: {deadline}</p>
-        <p>Categoria: {category}</p>
+        <p>
+          Categoria:{" "}
+          <strong
+            style={{
+              color: categoryColor ? categoryColor : "",
+              textTransform: "uppercase",
+            }}
+          >
+            {category}
+          </strong>
+        </p>
       </div>
       <button className="bg-indigo-500 text-white text-sm font-semibold rounded-md px-4 py-2 hover:bg-indigo-600">
         + adicionar pomodoro

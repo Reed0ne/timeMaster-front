@@ -2,11 +2,14 @@
 
 import React, { useEffect, useState } from "react";
 import TaskItem from "./ItemTodo";
-import { getAtividades } from "@/hooks/useAtividades";
+import { getAtividades, updateAtividade } from "@/hooks/useAtividades"; // Importar a função updateAtividade
+import { getCategorias } from "@/hooks/useCategoria"; // Importar a função getCategorias
 import IAtividade from "@/types/IAtividade";
+import ICategoria from "@/types/ICategoria"; // Criar interface para categoria, caso não tenha
 
 const Todolist = () => {
   const [atividades, setAtividades] = useState<IAtividade[]>([]);
+  const [categorias, setCategorias] = useState<ICategoria[]>([]); // Estado para categorias
 
   useEffect(() => {
     const fetchAtividades = async () => {
@@ -14,8 +17,56 @@ const Todolist = () => {
       setAtividades(data);
     };
 
+    const fetchCategorias = async () => {
+      const data = await getCategorias();
+      setCategorias(data);
+    };
+
     fetchAtividades();
+    fetchCategorias(); // Chama a função para obter categorias
   }, []);
+
+  // Função para alternar a conclusão da atividade
+  const handleCheckboxChange = async (
+    atividadeId: string,
+    concluida: boolean
+  ) => {
+    try {
+      // Atualizar o estado da atividade como concluída ou não
+      await updateAtividade(
+        atividadeId,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        concluida
+      );
+
+      // Atualizar o estado local de atividades para refletir a mudança
+      setAtividades((prev) =>
+        prev.map((atividade) =>
+          atividade._id === atividadeId
+            ? { ...atividade, concluida: !concluida } // Inverte o valor de "concluida"
+            : atividade
+        )
+      );
+      console.log("Atividade atualizada com sucesso!");
+    } catch (error) {
+      console.error("Erro ao atualizar a atividade:", error);
+    }
+  };
+
+  // Função para obter o nome da categoria a partir do ID
+  const getCategoriaNome = (id: string) => {
+    const categoria = categorias.find((cat) => cat._id === id);
+    return categoria ? categoria.name : "Categoria desconhecida"; // Retorna "Categoria desconhecida" se não encontrar
+  };
+
+  const getCategoriaColor = (id: string) => {
+    const categoria = categorias.find((cat) => cat._id === id);
+    return categoria ? categoria.cor : "Categoria desconhecida";
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 px-6 py-8">
@@ -50,9 +101,12 @@ const Todolist = () => {
           <TaskItem
             key={index}
             task={task.name}
-            category={task.id_categoria}
+            category={getCategoriaNome(task.id_categoria)}
             deadline={task.fimAtividade}
             completed={task.concluida}
+            onCheckboxChange={handleCheckboxChange}
+            atividadeId={task._id}
+            categoryColor={getCategoriaColor(task.id_categoria)}
           />
         ))}
       </div>
