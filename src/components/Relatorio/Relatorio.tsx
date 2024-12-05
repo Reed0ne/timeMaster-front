@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { FaFilePdf } from "react-icons/fa";
 import { Bar } from "react-chartjs-2";
 import {
@@ -12,6 +12,8 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import { getRelatorio } from "@/hooks/useRelatorio";
+import IRelatorio from "@/types/IRelatorio";
 
 // Registre os componentes necessários do Chart.js
 ChartJS.register(
@@ -24,22 +26,59 @@ ChartJS.register(
 );
 
 const Relatorio = () => {
+  const [relatorio, setRelatorio] = useState<IRelatorio | null>(null);
+
+  useEffect(() => {
+    const fetchRelatorio = async () => {
+      try {
+        const data = await getRelatorio();
+        setRelatorio(data);
+      } catch (error) {
+        console.error("Erro ao buscar relatório:", error);
+      }
+    };
+
+    fetchRelatorio();
+  }, []);
+
   // Dados do gráfico de barras
   const data = {
     labels: ["Semana Passada", "Essa Semana"], // Rótulos para as barras
     datasets: [
       {
-        label: "Atividades Finalizadas", // Título da barra
-        data: [10, 2], // Dados para as barras (Semana Passada, Essa Semana)
-        backgroundColor: "#525faa", // Cor da barra
-        borderColor: "rgba(99, 102, 241, 1)", // Cor da borda da barra
+        label: "Atividades Finalizadas",
+        data: relatorio
+          ? [
+              relatorio.semanaPassada.atividadesConcluidas,
+              relatorio.semanaAtual.atividadesConcluidas,
+            ]
+          : [0, 0],
+        backgroundColor: "#525faa",
+        borderColor: "rgba(99, 102, 241, 1)",
         borderWidth: 1,
       },
       {
-        label: "Pomodoros Utilizados", // Título da segunda barra
-        data: [4, 1], // Dados para as barras (Semana Passada, Essa Semana)
-        backgroundColor: "rgba(34, 197, 94, 0.6)", // Cor da barra
-        borderColor: "rgba(34, 197, 94, 1)", // Cor da borda da barra
+        label: "Pomodoros Utilizados",
+        data: relatorio
+          ? [
+              relatorio.semanaPassada.atividadesPommodoro,
+              relatorio.semanaAtual.atividadesPommodoro,
+            ]
+          : [0, 0],
+        backgroundColor: "rgba(34, 197, 94, 0.6)",
+        borderColor: "rgba(34, 197, 94, 1)",
+        borderWidth: 1,
+      },
+      {
+        label: "Atividades não finalizadas",
+        data: relatorio
+          ? [
+              relatorio.semanaPassada.atividadesNaoConcluidas,
+              relatorio.semanaAtual.atividadesNaoConcluidas,
+            ]
+          : [0, 0],
+        backgroundColor: "#FF1919",
+        borderColor: "#cc0000",
         borderWidth: 1,
       },
     ],
@@ -77,24 +116,40 @@ const Relatorio = () => {
           {/* Card - Semana Passada */}
           <div className="bg-gray-100 text-gray-800 rounded-lg shadow-md p-6 w-72 text-center">
             <h2 className="text-lg font-semibold mb-4">Semana passada</h2>
-            <p className="text-sm mb-2">10 de novembro - 16 de novembro 2024</p>
+            <p className="text-sm mb-2">24 de novembro - 30 de novembro 2024</p>
             <ul className="text-sm space-y-2">
-              <li>10 atividades marcadas como finalizadas</li>
-              <li>Você utilizou o pomodoro 4 vezes</li>
-              <li>Você não finalizou 6 atividades</li>
-              <li>A categoria mais utilizada por você foi: trabalho</li>
+              <li>
+                {relatorio?.semanaPassada.atividadesConcluidas} atividades
+                marcadas como finalizadas
+              </li>
+              <li>
+                Você utilizou o pomodoro{" "}
+                {relatorio?.semanaPassada.atividadesPommodoro} vezes
+              </li>
+              <li>
+                Você não finalizou{" "}
+                {relatorio?.semanaPassada.atividadesNaoConcluidas} atividades
+              </li>
             </ul>
           </div>
 
           {/* Card - Essa Semana */}
           <div className="bg-gray-100 text-gray-800 rounded-lg shadow-md p-6 w-72 text-center">
             <h2 className="text-lg font-semibold mb-4">Essa semana</h2>
-            <p className="text-sm mb-2">10 de novembro - 16 de novembro 2024</p>
+            <p className="text-sm mb-2">1 de dezembro - 7 de dezembro 2024</p>
             <ul className="text-sm space-y-2">
-              <li>2 atividades marcadas como finalizadas</li>
-              <li>Você utilizou o pomodoro 1 vez</li>
-              <li>Você não finalizou 6 atividades</li>
-              <li>A categoria mais utilizada por você foi: pessoal</li>
+              <li>
+                {relatorio?.semanaAtual.atividadesConcluidas} atividades
+                marcadas como finalizadas
+              </li>
+              <li>
+                Você utilizou o pomodoro{" "}
+                {relatorio?.semanaAtual.atividadesPommodoro} vezes
+              </li>
+              <li>
+                Você não finalizou{" "}
+                {relatorio?.semanaAtual.atividadesNaoConcluidas} atividades
+              </li>
             </ul>
           </div>
         </div>
@@ -103,12 +158,20 @@ const Relatorio = () => {
         <div className="flex flex-col md:flex-row justify-center items-center gap-6 mt-4">
           <div className="bg-transparent text-center">
             <p className="text-sm text-white font-medium">
-              Sua média geral foi: <span className="font-bold">X</span>
+              Sua média geral foi:{" "}
+              <span className="font-bold">
+                {relatorio?.semanaPassada.atividadesConcluidasAntes}
+              </span>{" "}
+              atividades antes do prazo
             </p>
           </div>
           <div className="bg-transparent text-center">
             <p className="text-sm text-white font-medium">
-              Sua média geral foi: <span className="font-bold">X</span>
+              Sua média geral foi:{" "}
+              <span className="font-bold">
+                {relatorio?.semanaAtual.atividadesConcluidasAntes}
+              </span>{" "}
+              atividades antes do prazo
             </p>
           </div>
         </div>
