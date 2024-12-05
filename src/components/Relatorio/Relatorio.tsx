@@ -1,9 +1,52 @@
+"use client";
+
 import React from "react";
 import { FaFilePdf } from "react-icons/fa";
+import { Bar } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from "chart.js";
+
+// Registre os componentes necessários do Chart.js
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 const Relatorio = () => {
+  // Dados do gráfico de barras
+  const data = {
+    labels: ["Semana Passada", "Essa Semana"], // Rótulos para as barras
+    datasets: [
+      {
+        label: "Atividades Finalizadas", // Título da barra
+        data: [10, 2], // Dados para as barras (Semana Passada, Essa Semana)
+        backgroundColor: "#525faa", // Cor da barra
+        borderColor: "rgba(99, 102, 241, 1)", // Cor da borda da barra
+        borderWidth: 1,
+      },
+      {
+        label: "Pomodoros Utilizados", // Título da segunda barra
+        data: [4, 1], // Dados para as barras (Semana Passada, Essa Semana)
+        backgroundColor: "rgba(34, 197, 94, 0.6)", // Cor da barra
+        borderColor: "rgba(34, 197, 94, 1)", // Cor da borda da barra
+        borderWidth: 1,
+      },
+    ],
+  };
+
   return (
-    <div className="min-h-screen flex justify-center items-center bg-gray-100">
+    <div className="min-h-screen flex justify-center items-center bg-gray-100 pt-10">
       {/* Container Principal */}
       <div className="relative bg-[#728fce] text-white rounded-lg p-8 w-[90%] max-w-4xl">
         {/* Fundo Lilás Claro */}
@@ -11,8 +54,22 @@ const Relatorio = () => {
 
         {/* Título e Ícone PDF */}
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold">Bem-vindo(a) ao seu relatório semanal!</h1>
+          <h1 className="text-2xl font-bold">
+            Bem-vindo(a) ao seu relatório semanal!
+          </h1>
           <FaFilePdf className="text-3xl" />
+        </div>
+
+        {/* Gráfico de Barras */}
+        <div
+          style={{
+            height: "300px",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Bar data={data} />
         </div>
 
         {/* Cards de Relatório */}
@@ -58,7 +115,9 @@ const Relatorio = () => {
 
         {/* Notificação */}
         <div className="mt-8 flex justify-center items-center gap-2">
-          <p className="text-sm">Quero ser notificado quando um novo relatório estiver pronto</p>
+          <p className="text-sm">
+            Quero ser notificado quando um novo relatório estiver pronto
+          </p>
           <input
             type="checkbox"
             className="toggle-checkbox h-5 w-5 border-2 border-purple-500 rounded-full bg-purple-500"
