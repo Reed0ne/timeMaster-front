@@ -5,12 +5,19 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import ptBrLocale from "@fullcalendar/core/locales/pt";
-import { getAtividades, updateAtividade } from "@/hooks/useAtividades"; // Função de update
+import {
+  createAtividade,
+  getAtividades,
+  updateAtividade,
+} from "@/hooks/useAtividades"; // Função de update
 import { useEffect, useState } from "react";
 import IAtividade from "@/types/IAtividade";
+import ICategoria from "@/types/ICategoria"; // Adicione um tipo para categorias
+import { getCategorias } from "@/hooks/useCategoria";
 
 const Calendar: React.FC = () => {
   const [atividades, setAtividades] = useState<IAtividade[]>([]);
+  const [categorias, setCategorias] = useState<ICategoria[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedAtividade, setSelectedAtividade] = useState<IAtividade | null>(
     null
@@ -22,21 +29,39 @@ const Calendar: React.FC = () => {
       setAtividades(data);
     };
 
+    const fetchCategorias = async () => {
+      // Adicione aqui sua lógica para buscar categorias
+      const response = await getCategorias();
+      setCategorias(response);
+    };
+
     fetchAtividades();
+    fetchCategorias();
   }, []);
 
   const handleEventClick = (eventInfo: any) => {
     const { id, title, start, end, color } = eventInfo.event;
-
-    const startISOString = start ? start.toISOString() : "";
-    const endISOString = end ? end.toISOString() : "";
-
     setSelectedAtividade({
       _id: id,
       name: title,
-      inicioAtividade: startISOString, // Converte para string
-      fimAtividade: endISOString, // Converte para string
+      inicioAtividade: start ? start.toISOString() : "",
+      fimAtividade: end ? end.toISOString() : "",
       cor: color,
+      isPommodoro: false,
+      concluida: false,
+      momentoConclusao: "",
+      id_categoria: "",
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleDateClick = (dateInfo: any) => {
+    setSelectedAtividade({
+      _id: "",
+      name: "",
+      inicioAtividade: dateInfo.dateStr,
+      fimAtividade: dateInfo.dateStr,
+      cor: "#000000", // Cor padrão
       isPommodoro: false,
       concluida: false,
       momentoConclusao: "",
@@ -61,35 +86,52 @@ const Calendar: React.FC = () => {
     } = selectedAtividade;
 
     try {
-      await updateAtividade(
-        _id,
-        new Date(inicioAtividade).toISOString(), // Converte para string
-        new Date(fimAtividade).toISOString(), // Converte para string
-        name,
-        isPommodoro,
-        cor,
-        concluida,
-        momentoConclusao,
-        id_categoria
-      );
+      if (_id) {
+        // Atualizar evento existente
+        await updateAtividade(
+          _id,
+          new Date(inicioAtividade).toISOString(),
+          new Date(fimAtividade).toISOString(),
+          name,
+          isPommodoro,
+          cor,
+          concluida,
+          momentoConclusao,
+          id_categoria
+        );
+        setAtividades((prev) =>
+          prev.map((atividade) =>
+            atividade._id === _id
+              ? { ...atividade, name, inicioAtividade, fimAtividade, cor }
+              : atividade
+          )
+        );
+      } else {
+        // Criar novo evento
+        const createdEvent = await createAtividade(
+          selectedAtividade.inicioAtividade,
+          selectedAtividade.fimAtividade,
+          selectedAtividade.name,
+          selectedAtividade.isPommodoro,
+          selectedAtividade.cor,
+          selectedAtividade.concluida,
+          selectedAtividade.momentoConclusao,
+          selectedAtividade.id_categoria
+        );
 
-      setAtividades((prev) =>
-        prev.map((atividade) =>
-          atividade._id === _id
-            ? { ...atividade, name, inicioAtividade, fimAtividade, cor }
-            : atividade
-        )
-      );
+        setAtividades((prev) => [...prev, createdEvent]);
+      }
 
-      console.log("Atividade atualizada com sucesso!");
+      console.log("Atividade salva com sucesso!");
       handleCloseModal();
     } catch (error) {
-      console.error("Erro ao atualizar a atividade:", error);
+      console.error("Erro ao salvar a atividade:", error);
     }
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
+    setSelectedAtividade(null);
   };
 
   const handleEventDrop = async (eventInfo: any) => {
@@ -99,7 +141,7 @@ const Calendar: React.FC = () => {
         id,
         start.toISOString(),
         end.toISOString(),
-        eventInfo.event.title, // Nome do evento
+        eventInfo.event.title,
         eventInfo.event.extendedProps.isPommodoro,
         eventInfo.event.color,
         eventInfo.event.extendedProps.concluida,
@@ -124,10 +166,31 @@ const Calendar: React.FC = () => {
     }
   };
 
+  const handleCreateNewActivity = () => {
+    setSelectedAtividade({
+      _id: "",
+      name: "",
+      inicioAtividade: new Date().toISOString(), // Data atual
+      fimAtividade: new Date().toISOString(),
+      cor: "#000000", // Cor padrão
+      isPommodoro: false,
+      concluida: false,
+      momentoConclusao: "",
+      id_categoria: "",
+    });
+    setIsModalOpen(true);
+  };
+
   return (
     <div className="p-4 bg-white rounded-md shadow-md text-black relative">
+      <button
+        className="bg-green-500 text-white py-2 px-4 rounded-md mb-4"
+        onClick={handleCreateNewActivity}
+      >
+        Criar Nova Atividade
+      </button>
       <FullCalendar
-        plugins={[dayGridPlugin, interactionPlugin, timeGridPlugin]} // Verifique se interactionPlugin está incluído
+        plugins={[dayGridPlugin, interactionPlugin, timeGridPlugin]}
         initialView="dayGridWeek"
         locale={ptBrLocale}
         headerToolbar={{
@@ -135,7 +198,7 @@ const Calendar: React.FC = () => {
           center: "title",
           right: "dayGridWeek,dayGridDay",
         }}
-        editable={true} // Isso deve permitir o arraste dos eventos
+        editable={true}
         selectable={true}
         droppable={true}
         events={atividades.map((atividade) => ({
@@ -147,13 +210,17 @@ const Calendar: React.FC = () => {
         }))}
         eventDrop={handleEventDrop}
         eventClick={handleEventClick}
+        dateClick={handleDateClick} // Permite adicionar eventos em espaços vazios
       />
 
-      {/* Modal de Edição */}
+      {/* Modal de Edição ou Criação */}
       {isModalOpen && selectedAtividade && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-md shadow-md w-1/3">
-            <h2 className="text-2xl font-semibold mb-4">Editar Atividade</h2>
+            <h2 className="text-2xl font-semibold mb-4">
+              {selectedAtividade._id ? "Editar Atividade" : "Criar Atividade"}
+            </h2>
+            {/* Campos do Modal */}
             <div>
               <label className="block mb-2">Nome:</label>
               <input
@@ -172,9 +239,7 @@ const Calendar: React.FC = () => {
               <input
                 type="datetime-local"
                 className="border p-2 w-full mb-4"
-                value={selectedAtividade.inicioAtividade
-                  .toString()
-                  .slice(0, 16)} // Exclui os milissegundos e "Z"
+                value={selectedAtividade.inicioAtividade.slice(0, 16)}
                 onChange={(e) =>
                   setSelectedAtividade((prev) =>
                     prev ? { ...prev, inicioAtividade: e.target.value } : prev
@@ -187,13 +252,32 @@ const Calendar: React.FC = () => {
               <input
                 type="datetime-local"
                 className="border p-2 w-full mb-4"
-                value={selectedAtividade.fimAtividade.toString().slice(0, 16)} // Exclui os milissegundos e "Z"
+                value={selectedAtividade.fimAtividade.slice(0, 16)}
                 onChange={(e) =>
                   setSelectedAtividade((prev) =>
                     prev ? { ...prev, fimAtividade: e.target.value } : prev
                   )
                 }
               />
+            </div>
+            <div>
+              <label className="block mb-2">Categoria:</label>
+              <select
+                className="border p-2 w-full mb-4"
+                value={selectedAtividade.id_categoria}
+                onChange={(e) =>
+                  setSelectedAtividade((prev) =>
+                    prev ? { ...prev, id_categoria: e.target.value } : prev
+                  )
+                }
+              >
+                <option value="">Selecione uma categoria</option>
+                {categorias.map((categoria) => (
+                  <option key={categoria._id} value={categoria._id}>
+                    {categoria.name}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="block mb-2">Cor:</label>
@@ -219,7 +303,7 @@ const Calendar: React.FC = () => {
                 className="bg-gray-500 text-white py-2 px-4 rounded-md"
                 onClick={handleCloseModal}
               >
-                Fechar
+                Cancelar
               </button>
             </div>
           </div>

@@ -44,4 +44,33 @@ const updateAtividade = async (
   }
 };
 
-export { getAtividades, updateAtividade };
+const createAtividade = async (
+  inicioAtividade: string,
+  fimAtividade: string,
+  name: string,
+  isPommodoro: boolean,
+  cor: string,
+  concluida: boolean,
+  momentoConclusao: string | null,
+  id_categoria: string
+): Promise<IAtividade> => {
+  try {
+    const response = await axiosApi.post("/atividades", {
+      inicioAtividade,
+      fimAtividade,
+      name,
+      isPommodoro,
+      cor,
+      concluida,
+      momentoConclusao,
+      id_categoria,
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("Erro ao criar atividades", error);
+    throw new Error("Falha ao criar atividades");
+  }
+};
+
+export { getAtividades, updateAtividade, createAtividade };
