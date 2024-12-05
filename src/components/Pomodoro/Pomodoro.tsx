@@ -59,6 +59,12 @@ function Pomodoro() {
     setCustomTimes((prev) => ({ ...prev, [mode]: numericValue }));
   };
 
+  // Reinicia o timer para o tempo inicial do modo atual
+  const handleReset = () => {
+    setIsRunning(false); // Pausa o timer
+    setTime(customTimes[mode] * 60); // Reseta o tempo para o valor inicial do modo
+  };
+
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
       {/* Contêiner principal */}
@@ -76,13 +82,25 @@ function Pomodoro() {
         <div className="text-white mt-10 text-8xl font-bold">
           {formatTime(time)}
         </div>
-        <button
-          className="mt-10 font-semibold text-2xl h-14 w-52 rounded-lg hover:opacity-90"
-          style={{ backgroundColor: "#485ca4", color: "white" }}
-          onClick={() => setIsRunning(!isRunning)}
-        >
-          {isRunning ? "pausar" : "iniciar"}
-        </button>
+        <div className="mt-10 flex gap-4 justify-center">
+          <button
+            className="font-semibold text-2xl h-14 w-52 rounded-lg hover:opacity-90"
+            style={{ backgroundColor: "#485ca4", color: "white" }}
+            onClick={() => setIsRunning(!isRunning)}
+          >
+            {isRunning ? "pausar" : "iniciar"}
+          </button>
+          {/* Botão "Reiniciar", só aparece quando o timer estiver rodando */}
+          {isRunning && (
+            <button
+              className="font-semibold text-2xl h-14 w-52 rounded-lg hover:opacity-90"
+              style={{ backgroundColor: "#c75757", color: "white" }}
+              onClick={handleReset}
+            >
+              reiniciar
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Botões de Modo */}
@@ -92,7 +110,7 @@ function Pomodoro() {
             <button
               key={btnMode}
               className={`font-medium rounded-lg h-10 w-40 text-lg hover:opacity-90 ${
-                mode === btnMode ? "bg-blue-800" : "bg-blue-600"
+                mode === btnMode ? "bg-[#2f4499]" : "bg-[#728fce]"
               }`}
               style={{ color: "white" }}
               onClick={() => handleModeChange(btnMode)}

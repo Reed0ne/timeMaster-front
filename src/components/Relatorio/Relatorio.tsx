@@ -85,18 +85,18 @@ const Relatorio = () => {
   };
 
   return (
-    <div className="min-h-screen flex justify-center items-center bg-gray-100 pt-10">
+    <div className="min-h-screen flex justify-center items-center bg-gray-50 pt-10">
       {/* Container Principal */}
-      <div className="relative bg-[#728fce] text-white rounded-lg p-8 w-[90%] max-w-4xl">
-        {/* Fundo Lilás Claro */}
-        <div className="absolute inset-0 bg-purple-200 rounded-lg -z-10 scale-105"></div>
+      <div className="relative bg-white text-black rounded-lg p-8 w-[90%] max-w-4xl shadow-lg">
+        {/* Fundo Claro */}
+        <div className="absolute inset-0 bg-white rounded-lg -z-10 scale-105"></div>
 
         {/* Título e Ícone PDF */}
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold">
+          <h1 className="text-2xl font-bold text-black">
             Bem-vindo(a) ao seu relatório semanal!
           </h1>
-          <FaFilePdf className="text-3xl" />
+          <FaFilePdf className="text-3xl text-black" />
         </div>
 
         {/* Gráfico de Barras */}
@@ -112,66 +112,70 @@ const Relatorio = () => {
         </div>
 
         {/* Cards de Relatório */}
-        <div className="flex flex-col md:flex-row justify-center items-center gap-6">
+        <div className="flex flex-col md:flex-row justify-center items-center gap-6 mt-12">
           {/* Card - Semana Passada */}
-          <div className="bg-gray-100 text-gray-800 rounded-lg shadow-md p-6 w-72 text-center">
+          <div className="bg-[#728fce] text-gray-800 rounded-lg shadow-md p-6 w-72 text-center">
             <h2 className="text-lg font-semibold mb-4">Semana passada</h2>
-            <p className="text-sm mb-2">24 de novembro - 30 de novembro 2024</p>
+            <p className="text-sm font-bold mb-4">24 de novembro - 30 de novembro 2024</p>
             <ul className="text-sm space-y-2">
               <li>
-                {relatorio?.semanaPassada.atividadesConcluidas} atividades
-                marcadas como finalizadas
+                {relatorio?.semanaPassada.atividadesConcluidas
+                  ? `${relatorio?.semanaPassada.atividadesConcluidas} atividades marcadas como finalizadas`
+                  : "Sem dados sobre atividades finalizadas"}
               </li>
               <li>
-                Você utilizou o pomodoro{" "}
-                {relatorio?.semanaPassada.atividadesPommodoro} vezes
+                {relatorio?.semanaPassada.atividadesPommodoro
+                  ? `Você utilizou o pomodoro ${relatorio?.semanaPassada.atividadesPommodoro} vezes`
+                  : "Sem dados sobre pomodoros utilizados"}
               </li>
               <li>
-                Você não finalizou{" "}
-                {relatorio?.semanaPassada.atividadesNaoConcluidas} atividades
+                {relatorio?.semanaPassada.atividadesNaoConcluidas
+                  ? `Você não finalizou ${relatorio?.semanaPassada.atividadesNaoConcluidas} atividades`
+                  : "Sem dados sobre atividades não finalizadas"}
               </li>
             </ul>
           </div>
 
           {/* Card - Essa Semana */}
-          <div className="bg-gray-100 text-gray-800 rounded-lg shadow-md p-6 w-72 text-center">
+          <div className="bg-[#728fce] text-gray-800 rounded-lg shadow-md p-6 w-72 text-center">
             <h2 className="text-lg font-semibold mb-4">Essa semana</h2>
-            <p className="text-sm mb-2">1 de dezembro - 7 de dezembro 2024</p>
+            <p className="text-sm font-bold mb-4">1 de dezembro - 7 de dezembro 2024</p>
             <ul className="text-sm space-y-2">
               <li>
-                {relatorio?.semanaAtual.atividadesConcluidas} atividades
-                marcadas como finalizadas
+                {relatorio?.semanaAtual.atividadesConcluidas
+                  ? `${relatorio?.semanaAtual.atividadesConcluidas} atividades marcadas como finalizadas`
+                  : "Sem dados sobre atividades finalizadas"}
               </li>
               <li>
-                Você utilizou o pomodoro{" "}
-                {relatorio?.semanaAtual.atividadesPommodoro} vezes
+                {relatorio?.semanaAtual.atividadesPommodoro
+                  ? `Você utilizou o pomodoro ${relatorio?.semanaAtual.atividadesPommodoro} vezes`
+                  : "Sem dados sobre pomodoros utilizados"}
               </li>
               <li>
-                Você não finalizou{" "}
-                {relatorio?.semanaAtual.atividadesNaoConcluidas} atividades
+                {relatorio?.semanaAtual.atividadesNaoConcluidas
+                  ? `Você não finalizou ${relatorio?.semanaAtual.atividadesNaoConcluidas} atividades`
+                  : "Sem dados sobre atividades não finalizadas"}
               </li>
             </ul>
           </div>
         </div>
 
         {/* Média Geral */}
-        <div className="flex flex-col md:flex-row justify-center items-center gap-6 mt-4">
+        <div className="flex flex-col md:flex-row justify-center items-center gap-6 mt-12">
           <div className="bg-transparent text-center">
-            <p className="text-sm text-white font-medium">
+            <p className="text-sm text-black font-medium">
               Sua média geral foi:{" "}
               <span className="font-bold">
-                {relatorio?.semanaPassada.atividadesConcluidasAntes}
-              </span>{" "}
-              atividades antes do prazo
+                {relatorio?.semanaPassada.atividadesConcluidasAntes ?? "Sem dados sobre atividades concluídas antes do prazo"}
+              </span>
             </p>
           </div>
           <div className="bg-transparent text-center">
-            <p className="text-sm text-white font-medium">
+            <p className="text-sm text-black font-medium">
               Sua média geral foi:{" "}
               <span className="font-bold">
-                {relatorio?.semanaAtual.atividadesConcluidasAntes}
-              </span>{" "}
-              atividades antes do prazo
+                {relatorio?.semanaAtual.atividadesConcluidasAntes ?? "Sem dados sobre atividades concluídas antes do prazo"}
+              </span>
             </p>
           </div>
         </div>

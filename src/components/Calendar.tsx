@@ -153,10 +153,10 @@ const Calendar: React.FC = () => {
         prev.map((atividade) =>
           atividade._id === id
             ? {
-                ...atividade,
-                inicioAtividade: start.toISOString(),
-                fimAtividade: end.toISOString(),
-              }
+              ...atividade,
+              inicioAtividade: start.toISOString(),
+              fimAtividade: end.toISOString(),
+            }
             : atividade
         )
       );
@@ -184,11 +184,13 @@ const Calendar: React.FC = () => {
   return (
     <div className="p-4 bg-white rounded-md shadow-md text-black relative">
       <button
-        className="bg-green-500 text-white py-2 px-4 rounded-md mb-4"
+        className="bg-blue-900 hover:bg-blue-700 text-white py-2 px-4 rounded-md mb-4 absolute right-44"
         onClick={handleCreateNewActivity}
       >
         Criar Nova Atividade
       </button>
+
+
       <FullCalendar
         plugins={[dayGridPlugin, interactionPlugin, timeGridPlugin]}
         initialView="dayGridWeek"
